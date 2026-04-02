@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AmneziaWG Signature Generator</title>
+  <link rel="icon" type="image/png" href="https://img.icons8.com/nolan/96/recycle-bin.png">
+  <link rel="apple-touch-icon" href="https://img.icons8.com/nolan/96/recycle-bin.png">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    html::-webkit-scrollbar {
+      display: none;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #111827;
+      color: #e5e7eb;
+      margin: 0;
+      padding: 24px;
+    }
+
+    .card {
+      max-width: 980px;
+      margin: 0 auto;
+      background: #1f2937;
+      border-radius: 28px;
+      padding: 32px 28px;
+      box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s;
+    }
+
+    h2 {
+      margin: 0 0 6px;
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: #1dcd12;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .hint {
+      color: #1dcd12;
+      font-size: 0.85rem;
+      margin: 0 0 20px;
+      border-left: 3px solid #1dcd12;
+      padding-left: 14px;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    input {
+      flex: 1;
+      padding: 14px 18px;
+      border-radius: 60px;
+      border: 1px solid #374151;
+      background: #0f172a;
+      color: #1dcd12;
+      font-size: 1rem;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: 'SF Mono', monospace;
+    }
+
+    input::placeholder {
+      color: #6b7280;
+    }
+
+    input:focus {
+      border-color: #1dcd12;
+      box-shadow: 0 0 0 3px rgba(29, 205, 18, 0.2);
+      background: #0b1120;
+    }
+
+    .btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 60px;
+      border: none;
+      background: #1dcd12;
+      color: #1f2937;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      box-shadow: 0 6px 12px rgba(29, 205, 18, 0.2);
+    }
+
+    .btn:hover:not(:disabled) {
+      background: #16b30c;
+      transform: scale(1.02);
+      box-shadow: 0 10px 20px rgba(29, 205, 18, 0.3);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+
+    .btn:disabled {
+      opacity: 0.7;
+      cursor: wait;
+      background: #475569;
+      color: white;
+    }
+
+    .send-icon {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 2.5px solid rgba(31, 41, 55, 0.3);
+      border-top-color: #1f2937;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .domain-example {
+      font-size: 0.75rem;
+      margin-top: 4px;
+      margin-bottom: 8px;
+      color: #1dcd12;
+      background: #11182770;
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 30px;
+      backdrop-filter: blur(2px);
+    }
+
+    .bulk-copy-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+      margin-bottom: 24px;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #2d3a4e;
+      padding-bottom: 12px;
+    }
+
+    .btn-copy-all {
+      background: #2d3748;
+      border: 1px solid #4b5563;
+      color: #1dcd12;
+      padding: 8px 22px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-copy-all:hover {
+      background: #3b4252;
+      border-color: #1dcd12;
+      transform: translateY(-1px);
+      color: #1dcd12;
+    }
+
+    .btn-copy-all:active {
+      transform: translateY(1px);
+    }
+
+    .copy-all-icon {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .copy-feedback {
+      font-size: 0.75rem;
+      background: #0f172a;
+      padding: 4px 14px;
+      border-radius: 40px;
+      color: #1dcd12;
+      border-left: 2px solid #1dcd12;
+      opacity: 0;
+      transition: opacity 0.15s;
+      pointer-events: none;
+    }
+
+    .copy-feedback.show {
+      opacity: 1;
+    }
+
+    .results-container {
+      margin-top: 6px;
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .results-container.visible {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      background: rgba(15, 23, 42, 0.4);
+      padding: 8px 12px 8px 16px;
+      border-radius: 20px;
+      transition: background 0.15s;
+      border: 1px solid #2d3748;
+    }
+
+    .result-row:hover {
+      background: #0f172a;
+      border-color: #1dcd12;
+    }
+
+    .result-label {
+      display: none;
+    }
+
+    .result-field {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 18px;
+      background: #030712;
+      border: 1px solid #2d3a4e;
+      color: #1dcd12;
+      font-size: 0.85rem;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-weight: 500;
+      white-space: pre-wrap;
+      word-break: break-all;
+      overflow-x: auto;
+      line-height: 1.5;
+      max-height: none;
+      min-height: 52px;
+    }
+
+    .result-field::-webkit-scrollbar {
+      height: 5px;
+      background: #1e293b;
+    }
+
+    .btn-copy-small {
+      width: 42px;
+      height: 42px;
+      border-radius: 40px;
+      background: #1e293b;
+      border: none;
+      cursor: pointer;
+      color: #1dcd12;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .btn-copy-small:hover {
+      background: #334155;
+      color: #1dcd12;
+      transform: scale(1.02);
+    }
+
+    .btn-copy-small.ok {
+      background: #1dcd12;
+      color: #1f2937;
+    }
+
+    .copy-icon {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .error-box {
+      margin-top: 24px;
+      background: #450a0a;
+      border-left: 5px solid #ef4444;
+      border-radius: 20px;
+      padding: 14px 20px;
+      color: #fecaca;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    .error-box.visible {
+      display: block;
+    }
+
+    .info-box {
+      margin-top: 22px;
+      padding: 12px 20px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      display: none;
+      backdrop-filter: blur(2px);
+    }
+
+    .info-box.visible {
+      display: block;
+    }
+
+    .info-box--primary {
+      background: #0c4a6e;
+      border-left: 4px solid #1dcd12;
+      color: #1dcd12;
+    }
+
+    .info-box--warn {
+      background: #7c2d12;
+      border-left: 4px solid #1dcd12;
+      color: #1dcd12;
+    }
+
+    footer {
+      margin-top: 48px;
+      text-align: center;
+      font-size: 0.7rem;
+      color: #4b5563;
+    }
+
+    @media (max-width: 680px) {
+      body {
+        padding: 16px;
+      }
+      .card {
+        padding: 22px 18px;
+      }
+      h2 {
+        font-size: 1.5rem;
+      }
+      .result-field {
+        font-size: 0.7rem;
+        padding: 10px 12px;
+      }
+      .result-row {
+        gap: 8px;
+        padding: 10px;
+      }
+      .btn-copy-small {
+        align-self: center;
+      }
+      .bulk-copy-bar {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h2>🔐 AmneziaWG Signature Generator</h2>
+  <p class="hint">Генерация реальных QUIC-сигнатур I1–I5 для WireGuard протоколов</p>
+  <div class="row">
+    <input id="domain" placeholder="введите домен" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="url" autofocus/>
+    <button id="run" class="btn" title="Получить сигнатуры">
+      <svg class="send-icon" viewBox="0 0 24 24">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </button>
+  </div>
+  <div class="domain-example">
+    Примеры: ivi.ru, wildberries.ru, nalog.ru, kremlin.ru, ozon.ru, rzd.ru
+  </div>
+
+  <div id="results" class="results-container">
+    <div class="bulk-copy-bar" id="bulkCopyBar" style="display: none;">
+      <button id="copyAllBtn" class="btn-copy-all">
+        <svg class="copy-all-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        Скопировать все значения
+      </button>
+      <span id="copyAllFeedback" class="copy-feedback">✓ Готово</span>
+    </div>
+
+    <div class="result-row">
+      <div id="field1" class="result-field"></div>
+      <button class="btn-copy-small" data-index="1" title="Копировать I1">
+        <svg class="copy-icon" viewBox="0 0 24 24">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="result-row">
+      <div id="field2" class="result-field"></div>
+      <button class="btn-copy-small" data-index="2" title="Копировать I2">
+        <svg class="copy-icon" viewBox="0 0 24 24">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="result-row">
+      <div id="field3" class="result-field"></div>
+      <button class="btn-copy-small" data-index="3" title="Копировать I3">
+        <svg class="copy-icon" viewBox="0 0 24 24">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="result-row">
+      <div id="field4" class="result-field"></div>
+      <button class="btn-copy-small" data-index="4" title="Копировать I4">
+        <svg class="copy-icon" viewBox="0 0 24 24">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="result-row">
+      <div id="field5" class="result-field"></div>
+      <button class="btn-copy-small" data-index="5" title="Копировать I5">
+        <svg class="copy-icon" viewBox="0 0 24 24">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="error" class="error-box"></div>
+  <div id="info" class="info-box"></div>
+</div>
+
+<footer></footer>
+
+<script>
+  const API_BASE_URL = 'https://junk.web2core.workers.dev';
+
+  const SVG_ICONS = {
+    copy: '<svg class="copy-icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
+    check: '<svg class="copy-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+    send: '<svg class="send-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>'
+  };
+
+  const domainEl = document.getElementById('domain');
+  const runBtn = document.getElementById('run');
+  const resultsEl = document.getElementById('results');
+  const errorEl = document.getElementById('error');
+  const infoEl = document.getElementById('info');
+  const bulkCopyBar = document.getElementById('bulkCopyBar');
+  const copyAllBtn = document.getElementById('copyAllBtn');
+  const copyAllFeedbackSpan = document.getElementById('copyAllFeedback');
+
+  let lastSignatures = { i1: '', i2: '', i3: '', i4: '', i5: '' };
+
+  function showInfo(messageHtml, variant) {
+    infoEl.innerHTML = messageHtml;
+    infoEl.className = `info-box visible ${variant === 'warn' ? 'info-box--warn' : 'info-box--primary'}`;
+  }
+
+  function escapeHtml(value) {
+    if (value === undefined || value === null) return '';
+    return String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  function updateFieldsWithFormattedValues(data) {
+    const labels = ['I1', 'I2', 'I3', 'I4', 'I5'];
+    for (let i = 1; i <= 5; i++) {
+      const fieldDiv = document.getElementById('field' + i);
+      const row = fieldDiv?.closest('.result-row');
+      const value = data['i' + i];
+      const label = labels[i - 1];
+      
+      if (value && String(value).trim() !== '') {
+        fieldDiv.textContent = `${label} = ${value}`;
+        if (row) row.style.display = 'flex';
+      } else {
+        fieldDiv.textContent = `${label} = (нет данных)`;
+        if (row) row.style.display = 'flex';
+      }
+    }
+  }
+
+  function buildFormattedSignaturesBlock() {
+    const lines = [];
+    const labels = ['I1', 'I2', 'I3', 'I4', 'I5'];
+    const values = [lastSignatures.i1, lastSignatures.i2, lastSignatures.i3, lastSignatures.i4, lastSignatures.i5];
+    for (let idx = 0; idx < labels.length; idx++) {
+      const val = values[idx];
+      if (val && String(val).trim() !== '') {
+        lines.push(`${labels[idx]} = ${val}`);
+      } else {
+        lines.push(`${labels[idx]} = (нет данных)`);
+      }
+    }
+    return lines.join('\n');
+  }
+
+  async function copyAllSignatures() {
+    const formattedText = buildFormattedSignaturesBlock();
+    try {
+      await navigator.clipboard.writeText(formattedText);
+      if (copyAllFeedbackSpan) {
+        copyAllFeedbackSpan.textContent = '✓ Все скопировано!';
+        copyAllFeedbackSpan.classList.add('show');
+        setTimeout(() => {
+          copyAllFeedbackSpan.classList.remove('show');
+          copyAllFeedbackSpan.textContent = '✓ Скопировано!';
+        }, 2000);
+      }
+    } catch (err) {
+      if (copyAllFeedbackSpan) {
+        copyAllFeedbackSpan.textContent = '❌ Ошибка';
+        copyAllFeedbackSpan.classList.add('show');
+        setTimeout(() => {
+          copyAllFeedbackSpan.classList.remove('show');
+          copyAllFeedbackSpan.textContent = '✓ Скопировано!';
+        }, 1500);
+      }
+    }
+  }
+
+  async function run() {
+    const domain = domainEl.value.trim();
+    if (!domain) {
+      errorEl.textContent = 'Введите домен';
+      errorEl.classList.add('visible');
+      return;
+    }
+
+    runBtn.disabled = true;
+    runBtn.innerHTML = '<div class="spinner"></div>';
+    resultsEl.classList.remove('visible');
+    errorEl.classList.remove('visible');
+    infoEl.className = 'info-box';
+    bulkCopyBar.style.display = 'none';
+
+    try {
+      const res = await fetch(API_BASE_URL + '/signature?domain=' + encodeURIComponent(domain));
+      const data = await res.json();
+
+      if (!data.ok) {
+        errorEl.textContent = data.error || 'Ошибка при получении сигнатур. Проверьте домен.';
+        errorEl.classList.add('visible');
+        lastSignatures = { i1: '', i2: '', i3: '', i4: '', i5: '' };
+        updateFieldsWithFormattedValues({ i1: '', i2: '', i3: '', i4: '', i5: '' });
+        resultsEl.classList.add('visible');
+        bulkCopyBar.style.display = 'flex';
+        return;
+      }
+
+      lastSignatures = {
+        i1: data.i1 || '',
+        i2: data.i2 || '',
+        i3: data.i3 || '',
+        i4: data.i4 || '',
+        i5: data.i5 || ''
+      };
+
+      updateFieldsWithFormattedValues(data);
+
+      if (data.status && data.status.title && data.status.message) {
+        const icon = escapeHtml(data.status.icon || 'ℹ️');
+        const title = escapeHtml(data.status.title);
+        const message = escapeHtml(data.status.message);
+        const variant = data.status.variant === 'warn' ? 'warn' : 'primary';
+        let statusText = `${icon} <strong>${title}:</strong> ${message}`;
+        if (data.warning) {
+          showInfo(`${statusText}<br>⚠️ ${escapeHtml(data.warning)}`, 'warn');
+        } else {
+          showInfo(statusText, variant);
+        }
+      } else if (data.warning) {
+        showInfo(`⚠️ ${escapeHtml(data.warning)}`, 'warn');
+      }
+
+      bulkCopyBar.style.display = 'flex';
+      resultsEl.classList.add('visible');
+    } catch (err) {
+      console.error(err);
+      errorEl.textContent = '🌐 Сетевая ошибка: не удалось соединиться с API. Возможно, блокировка или сервер временно недоступен.';
+      errorEl.classList.add('visible');
+      updateFieldsWithFormattedValues({ i1: '', i2: '', i3: '', i4: '', i5: '' });
+      resultsEl.classList.add('visible');
+      bulkCopyBar.style.display = 'flex';
+    } finally {
+      runBtn.disabled = false;
+      runBtn.innerHTML = SVG_ICONS.send;
+    }
+  }
+
+  function attachIndividualCopyHandlers() {
+    document.querySelectorAll('.btn-copy-small').forEach(btn => {
+      btn.removeEventListener('click', individualCopyHandler);
+      btn.addEventListener('click', individualCopyHandler);
+    });
+  }
+
+  function individualCopyHandler(e) {
+    const btn = e.currentTarget;
+    const index = btn.getAttribute('data-index');
+    const field = document.getElementById('field' + index);
+    if (!field || !field.textContent.trim()) return;
+    const text = field.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.innerHTML = SVG_ICONS.check;
+      btn.classList.add('ok');
+      setTimeout(() => {
+        btn.innerHTML = SVG_ICONS.copy;
+        btn.classList.remove('ok');
+      }, 1800);
+    }).catch(() => {});
+  }
+
+  if (copyAllBtn) {
+    copyAllBtn.addEventListener('click', copyAllSignatures);
+  }
+
+  attachIndividualCopyHandlers();
+  const observer = new MutationObserver(() => attachIndividualCopyHandlers());
+  observer.observe(resultsEl, { childList: true, subtree: true });
+
+  runBtn.addEventListener('click', run);
+  domainEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter') run();
+  });
+
+  domainEl.addEventListener('focus', () => {
+    errorEl.classList.remove('visible');
+    infoEl.className = 'info-box';
+  });
+
+  updateFieldsWithFormattedValues({ i1: '', i2: '', i3: '', i4: '', i5: '' });
+</script>
+</body>
+</html>
